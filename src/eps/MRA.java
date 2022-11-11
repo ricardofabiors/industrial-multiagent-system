@@ -18,6 +18,7 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OntologyServer;
 import jade.core.behaviours.WakerBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -28,6 +29,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.*;
+import jdk.management.resource.internal.SimpleResourceContext;
 
 /**
  * Class define one Mecatronic Agent. To create a mecatronic agent, create a
@@ -234,7 +236,11 @@ public abstract class MRA extends Agent {
             public void action() {
                 ACLMessage cfp = myAgent.receive(template);
                 if (cfp != null) {
-                    myAgent.addBehaviour(new SSContractNetResponder(myAgent, cfp){
+                    // cria um embrulho de thread behaviour
+                    ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+                    
+                    //especifica o comportamento de respondedor
+                    Behaviour responder = new SSContractNetResponder(myAgent, cfp){
                         @Override
                         protected ACLMessage handleCfp(ACLMessage cfp) {
                             return serveHandleCfp(cfp);     
@@ -243,7 +249,10 @@ public abstract class MRA extends Agent {
                         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
                             return serveHandleAcceptProposal(cfp, propose, accept); 
                         }
-                    });
+                    };
+                    
+                    //embrulha o comportamento acima como um thread behavior e o adiciona ao agente
+                    addBehaviour(tbf.wrap(responder));
                 }
                 else {
                     block();
@@ -329,7 +338,8 @@ public abstract class MRA extends Agent {
             System.out.println("ContentObject inválido.");
         }
         System.out.println(getLocalName() + ": Resposta enviada ao Accept de " + accept.getSender().getLocalName());
-        return reply; 
+        
+        return reply;         
     }
 
     /**
