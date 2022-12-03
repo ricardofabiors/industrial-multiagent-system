@@ -7,6 +7,8 @@ package eps;
 import de.re.easymodbus.modbusclient.ModbusClient;
 import eps.ontology.Execute;
 import eps.ontology.EPSOntology;
+import eps.ontology.SkillRequest;
+import eps.ontology.SkillResult;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -21,6 +23,8 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,9 +41,13 @@ public abstract class MRA extends Agent {
     public final static String MRA_AGENT_NAME = "mra";
     public ModbusClient modbusClient;
     
+    protected Queue<SkillRequest> skillExecutionRequests = new LinkedList<>(); //fila de requisição de execução de skills do MRA
+    protected int queueCount = 0;
+    protected SkillResult skill_result_buffer = null;
+    
     protected Skill[] skills;           //vetor de skills do MRA
     protected MRAInfo myMrainfo;        //conjuto de informações do MRA
-    protected String cost = "1";        //custo (tempo) (não utilizado ainda)
+    protected int cost = 0;       //custo (tempo) (não utilizado ainda)
     protected boolean isBusy = false;   //se está ocupado
     
     public static final String GREEN = "\033[0;32m";    //cor verde a ser utilizada nos prints
@@ -179,12 +187,9 @@ public abstract class MRA extends Agent {
             for (Skill skill : skills) {
                 //verifica se a skill solicitada é válida e muda o perfomativo, se for o caso
                 if (Util.fromSkill(skill).equalsWithoutAllProperties(requestedSkill)) { 
-                    if (!isBusy) {
-                        reply.setPerformative(ACLMessage.PROPOSE);
-                        reply.setContent(cost);
-                        System.out.println(getLocalName() + ": Skill coincidente identificada");
-                    }
-                    else System.out.println(getLocalName() + ": Ocupado!");
+                    System.out.println(getLocalName() + ": Skill coincidente identificada");
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent(String.valueOf(getCost()));
                 }
             }
         } catch (UnreadableException ex) {
@@ -417,5 +422,26 @@ public abstract class MRA extends Agent {
 	{		
 	}
         return result;
+    }
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////
+    
+    
+    protected synchronized int getCost() {
+        return cost;
+    }
+    
+    protected synchronized void increaseCost() {
+        cost = cost + 10;
+    }
+    
+    protected void decreaseCost() {
+        if(cost >= 10) cost = cost - 10;
+    }
+    
+    protected int getNewKey(){
+        queueCount++;
+        return queueCount;
     }
 }
