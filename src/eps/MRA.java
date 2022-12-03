@@ -135,7 +135,56 @@ public abstract class MRA extends Agent {
     protected void takeDown() {
         this.tbf.interrupt();
     }
-
+    
+        protected void addSkillExecutionBehaviour() {
+        Behaviour executor = new CyclicBehaviour(this) {
+            @Override
+            public void action() {
+                //System.out.println(getLocalName() + "(executor): Procurando por skill para executar");
+                if (getSkillExecutionRequestsSize() >= 1) {
+                    System.out.println(getLocalName() + "(executor): Skill achada");
+                    SkillRequest sk_req = getSkillExecutionRequest();
+                    Execute exc = sk_req.getExecuteObj();
+                    SkillTemplate requestedSkill = exc.getSkillTemplate();
+                    ACLMessage reply = sk_req.getReplyObj();
+                    
+                    for (Skill sk : skills) {
+                        //verifica se a skill solicitada é válida e a executa, se for o caso
+                        if (Util.fromSkill(sk).equalsWithoutAllProperties(requestedSkill)) { 
+                            sk.setArgsTypes(requestedSkill.getArgsTypes());
+                            sk.setArgsValues(requestedSkill.getArgsValues());
+                            
+                            try {
+                                sk.execute();
+                                if("failed".equals(sk.getResult())) {
+                                    reply.setPerformative(ACLMessage.FAILURE);
+                                    reply.setContent("failed");
+                                }
+                                else {
+                                    reply.setPerformative(ACLMessage.INFORM);
+                                    reply.setContent(sk.getResult());
+                                }
+                            } catch (SkillExecuteException ex) {
+                                Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    }
+                    
+                    SkillResult result = new SkillResult(sk_req.getKey(), reply);
+                    setSkillResult(result);
+                    
+                    if(getSkillExecutionRequestsSize() == 0){
+                        resetQueueCount();
+                    }
+                }
+//                else {
+//                    block();
+//                }
+            }
+        };
+        
+        addBehaviour(tbf.wrap(executor));
+    }
     
     /**
      * Cria e adiciona um comportamento cíclico que permite ao MRA participar
@@ -443,5 +492,32 @@ public abstract class MRA extends Agent {
     protected int getNewKey(){
         queueCount++;
         return queueCount;
+    }
+    
+    
+    protected int getSkillExecutionRequestsSize(){
+        return skillExecutionRequests.size();
+    }
+    
+    protected SkillRequest getSkillExecutionRequest(){
+        return skillExecutionRequests.remove();
+    }
+    
+    protected  void setSkillResult(SkillResult result) {
+        if(skill_result_buffer == null){
+            skill_result_buffer = result;
+        }
+        else {
+            System.out.println(this.getLocalName() + "(executor): Não foi possível setar o resultado no buffer");
+        }
+    }
+    
+    protected void resetQueueCount() {
+        if(skillExecutionRequests.size() == 0){
+            queueCount = 0;
+        }
+        else {
+            System.out.println(this.getLocalName() + "(executor): Não foi possível resetar a fila");
+        }
     }
 }
