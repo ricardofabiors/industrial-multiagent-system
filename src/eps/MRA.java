@@ -7,11 +7,7 @@ package eps;
 import de.re.easymodbus.modbusclient.ModbusClient;
 import eps.ontology.Execute;
 import eps.ontology.EPSOntology;
-import jade.content.ContentElement;
-import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
-import jade.content.onto.OntologyException;
-import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -24,13 +20,10 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
-import jade.proto.SSContractNetResponder;
 import java.io.IOException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.*;
-import jdk.management.resource.internal.SimpleResourceContext;
 
 /**
  * Class define one Mecatronic Agent. To create a mecatronic agent, create a
