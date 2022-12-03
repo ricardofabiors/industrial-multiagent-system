@@ -200,7 +200,7 @@ public abstract class MRA extends Agent {
             for (Skill skill : skills) {
                 //verifica se a skill solicitada é válida e muda o perfomativo, se for o caso
                 if (Util.fromSkill(skill).equalsWithoutAllProperties(requestedSkill)) { 
-                    System.out.println(getLocalName() + ": Skill coincidente identificada");
+                    System.out.println(getLocalName() + ": Skill coincidente identificada: " + skill.name);
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent(String.valueOf(getCost()));
                 }

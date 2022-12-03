@@ -202,7 +202,15 @@ public class Gateway extends Agent {
      * Método chamado no "setup" do agente para instanciar todos os agentes da 
      * camada física utilizando o método "instanciate".
      */
-    protected void instantiatePhysicalLayerAgents() {
+    protected void instantiatePhysicalLayerAgents() {        
+        Conveyor conveyor1;
+        conveyor1 = new Conveyor("p0 to p1", 0, 0, 1, 1, 2, 2);
+        instantiate("Conveyor1", conveyor1);
+        
+        Conveyor conveyor2;
+        conveyor2 = new Conveyor("p2 to p3", 3, 3, 4, 4, 5, 5);
+        instantiate("Conveyor2", conveyor2);
+        
 //        System.out.println(this.getLocalName() + ": Instanciando agentes da camada física...");
 //        StorageConveyor storage;
 //        storage = new StorageConveyor("p0 to p1");
@@ -215,15 +223,7 @@ public class Gateway extends Agent {
 //        RotateConveyor rotate2;
 //        rotate2 = new RotateConveyor("to p4", "to p6", "from p3", "from p6");
 //        instantiate("RotateConveyor2", rotate2);
-        
-        Conveyor conveyor1;
-        conveyor1 = new Conveyor("p2 to p3", 0, 0, 1, 1, 2, 2);
-        instantiate("Conveyor1", conveyor1);
-        
-        Conveyor conveyor2;
-        conveyor2 = new Conveyor("p11 to p12", 3, 3, 4, 4, 5, 5);
-        instantiate("Conveyor2", conveyor2);
-        
+//
 //        ResourceConveyor resourceconv;
 //        resourceconv = new ResourceConveyor("p6 to p7", "p6 to p8", "p7 to p8", "p8 to p9");
 //        instantiate("ResourceConveyor", resourceconv);

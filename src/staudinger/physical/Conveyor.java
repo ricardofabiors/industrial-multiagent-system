@@ -75,10 +75,11 @@ public class Conveyor extends MRA{
                     
                     writeCoil(moveCoilAddress, true);
                     System.out.println(this.myMRA.getLocalName() + ": Movendo para frente...");
-                    while(readInput(isMovedAddress) != true){
-                        
-                    }
-                    writeCoil(moveCoilAddress, false); 
+                    
+//                    while(readInput(isMovedAddress) != true){   
+//                    }
+//                    writeCoil(moveCoilAddress, false); 
+                    
                     System.out.println(this.myMRA.getLocalName() + ": Movido.");
                     result = "true";
                     break;
@@ -112,10 +113,11 @@ public class Conveyor extends MRA{
                     
                     writeCoil(sendCoilAddress, true);
                     System.out.println(this.myMRA.getLocalName() + ": Enviando para frente...");
-                    while(readInput(isSentAddress) != true){
-                        
-                    }
-                    writeCoil(sendCoilAddress, false); 
+                    
+//                    while(readInput(isSentAddress) != true){
+//                    }
+//                    writeCoil(sendCoilAddress, false); 
+                    
                     System.out.println(this.myMRA.getLocalName() + ": Enviado.");
                     result = "true";
                     break;
@@ -149,10 +151,12 @@ public class Conveyor extends MRA{
                     
                     writeCoil(receiveCoilAddress, true); 
                     System.out.println(this.myMRA.getLocalName() + ": Recebendo...");
-                    while(readInput(isReceivedAddress) != true){
-                        //System.out.println(this.myMRA.getLocalName() + ": Recebendo..." + readInput(9));
-                    }
-                    writeCoil(receiveCoilAddress, false); 
+                    
+//                    while(readInput(isReceivedAddress) != true){
+//                        //System.out.println(this.myMRA.getLocalName() + ": Recebendo..." + readInput(9));
+//                    }
+//                    writeCoil(receiveCoilAddress, false); 
+                    
                     System.out.println(this.myMRA.getLocalName() + ": Recebido.");
                     result = "true";
                     break;

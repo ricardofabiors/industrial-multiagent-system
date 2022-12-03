@@ -80,34 +80,35 @@ public class TestOrder extends Product{
      */
     private void createPlan() throws YPAException{
         
-        //conveyor 1 move o caixote para a conveyor 2
+        //conveyor 1 move o caixote para a rotate conveyor 2
+        SkillTemplate st1 = new SkillTemplate("move", "boolean", new String[]{"int"});
+        st1.addProperty("p0 to p1", "yes");
+        st1.setArgsValues(new String[]{"1"});
+        myPlan.addNewPlanItem(st1);    //adiciona novo item no plano de execução
+
+        //conveyor 1 move o caixote para a rotate conveyor 2
         SkillTemplate st2 = new SkillTemplate("move", "boolean", new String[]{"int"});
-        st2.addProperty("p1 to p2", "yes");
+        st2.addProperty("p2 to p3", "yes");
         st2.setArgsValues(new String[]{"1"});
-        //PlanItem parallel_2 = myPlan.createNewPlanItem(st2);
-        myPlan.addNewPlanItem(st2); 
+        myPlan.addNewPlanItem(st2);    //adiciona novo item no plano de execução        
         
-        //conveyor 1 envia o caixote para a conveyor 2
-        SkillTemplate st = new SkillTemplate("send", "boolean", new String[]{"int"});
-        st.addProperty("p1 to p2", "yes");
-        st.setArgsValues(new String[]{"1"});
-        PlanItem parallel_2 = myPlan.createNewPlanItem(st);
-        //myPlan.addNewPlanItem(st); 
-        
-        //conveyor 2 recebe o caixote 
-        SkillTemplate st1 = new SkillTemplate("receive", "boolean", new String[]{"int"});
-        st1.addProperty("p2 to p3", "yes");
-        st1.setArgsValues(new String[]{"2"});
-        PlanItem parallel_1 = myPlan.createNewPlanItem(st1);
-        //myPlan.addNewPlanItem(st1); 
-        
-        myPlan.addNewParallelItem(parallel_1, parallel_2);
-        
-        //conveyor 2 move o caixote para a conveyor 3
-        SkillTemplate st3 = new SkillTemplate("move", "boolean", new String[]{"int"});
-        st3.addProperty("p2 to p3", "yes");
-        st3.setArgsValues(new String[]{"1"});
-        myPlan.addNewPlanItem(st3);    //adiciona novo item no plano de execução    
+//        //conveyor 1 envia o caixote para a conveyor 2
+//        SkillTemplate st = new SkillTemplate("send", "boolean", new String[]{"int"});
+//        st.addProperty("p1 to p2", "yes");
+//        st.setArgsValues(new String[]{"1"});
+//        myPlan.addNewPlanItem(st); 
+//        
+//        //conveyor 2 recebe o caixote 
+//        SkillTemplate st1 = new SkillTemplate("receive", "boolean", new String[]{"int"});
+//        st1.addProperty("p2 to p3", "yes");
+//        st1.setArgsValues(new String[]{"2"});
+//        myPlan.addNewPlanItem(st1); 
+//        
+//        //conveyor 2 move o caixote para a conveyor 3
+//        SkillTemplate st3 = new SkillTemplate("move", "boolean", new String[]{"int"});
+//        st3.addProperty("p2 to p3", "yes");
+//        st3.setArgsValues(new String[]{"1"});
+//        myPlan.addNewPlanItem(st3);    //adiciona novo item no plano de execução    
         
     }
     
