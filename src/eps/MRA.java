@@ -23,6 +23,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
+import jade.proto.ContractNetResponder;
 import jade.proto.SSContractNetResponder;
 import java.io.IOException;
 import java.util.Vector;
@@ -41,6 +42,7 @@ public abstract class MRA extends Agent {
 
     private Behaviour autorunBeh;
     public final static String MRA_AGENT_NAME = "mra";
+    public ModbusClient modbusClient;
     
     protected Skill[] skills;           //vetor de skills do MRA
     protected MRAInfo myMrainfo;        //conjuto de informações do MRA
@@ -48,10 +50,11 @@ public abstract class MRA extends Agent {
     protected boolean isBusy = false;   //se está ocupado
     
     public static final String GREEN = "\033[0;32m";    //cor verde a ser utilizada nos prints
-    public static final String RESET = "\u001B[0m";     
+    public static final String RESET = "\u001B[0m";
     
-    public ModbusClient modbusClient;
-
+    protected ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+    
+    
     public MRA() {
     }
 
@@ -129,91 +132,9 @@ public abstract class MRA extends Agent {
 
     @Override
     protected void takeDown() {
+        this.tbf.interrupt();
     }
 
-    /**
-     * Execute a local skill with a remote call.
-     *
-     * @param exec
-     * @param request
-     */
-    public void serveExecuteRequest(Execute exec, ACLMessage request) {
-        ACLMessage msg = request.createReply();
-        try {
-            ContentElement ce = getContentManager().extractContent(request);
-            if (ce instanceof Action) {
-                Execute ex = (Execute) ((Action) ce).getAction();
-                SkillTemplate st = ex.getSkillTemplate();
-                boolean b = false;
-                for (Skill sk : getSkills()) {
-                    if (st.equals((SkillBase) sk)) {
-                        sk.setArgsValues(st.getArgsValues());
-                        sk.execute();
-                        msg.setPerformative(ACLMessage.INFORM);
-                        msg.setContent(sk.getResult());
-                        b = true;
-                        break;
-                    }
-                }
-                if (!b) {
-                    msg.setPerformative(ACLMessage.FAILURE);
-                    msg.setContent("Skill not found!!!");
-                }
-            }
-        } catch (Codec.CodecException | OntologyException | SkillExecuteException ex) {
-            msg.setPerformative(ACLMessage.FAILURE);
-            msg.setContent(ex.toString());
-        }
-        send(msg);
-    }
-
-    /**
-     * Call this method to create a Initiator for an agent execute remotely
-     *
-     * @param mraInfo
-     * @param st the template to execute in target agent
-     * @return the return of execute skill;
-     * @throws eps.SkillExecuteException Error
-     *
-     */
-    public String executeRemoteSkill(MRAInfo mraInfo, SkillTemplate st) throws SkillExecuteException {
-        
-        String result = "";
-        
-        Execute ex = new Execute();
-        ex.setMRAInfo(mraInfo);
-        ex.setSkillTemplate(st);
-        Action act = new Action(getAID(), ex);
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-        request.setSender(getAID());
-        request.addReceiver(new AID(mraInfo.getAID(), false));
-        request.setLanguage(new SLCodec().getName());
-        request.setOntology(EPSOntology.EPSONTOLOGYNAME);
-        try {
-            getContentManager().fillContent(request, act);
-            send(request);
-
-            MessageTemplate mt = MessageTemplate.and(
-                    MessageTemplate.or(
-                            MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-                            MessageTemplate.MatchPerformative(ACLMessage.FAILURE)),
-                    MessageTemplate.MatchOntology(EPSOntology.EPSONTOLOGYNAME));
-            ACLMessage msg = this.blockingReceive(mt, 2000);
-            if (msg == null) {
-                throw new SkillExecuteException("Timeout Error in YPA.");
-            } else {
-                if (msg.getPerformative() == ACLMessage.FAILURE) {
-                    throw new SkillExecuteException(msg.getContent());
-                } else {
-                    result = msg.getContent();
-                }
-            }
-        } catch (Codec.CodecException | OntologyException ex1) {
-            throw new SkillExecuteException("Error generating execute Skill. Exception: ", ex1);
-        }
-        
-        return result;
-    }
     
     /**
      * Cria e adiciona um comportamento cíclico que permite ao MRA participar
@@ -230,35 +151,19 @@ public abstract class MRA extends Agent {
             MessageTemplate.MatchProtocol("fipa-contract-net"),
             MessageTemplate.MatchPerformative(ACLMessage.CFP)
         );
-        //adiciona um comportamento cíclico que permite adicionar comportamentos de "participante" simultâneos
-        addBehaviour(new CyclicBehaviour(this) {
+        
+        Behaviour responder = new ContractNetResponder(this, template){
             @Override
-            public void action() {
-                ACLMessage cfp = myAgent.receive(template);
-                if (cfp != null) {
-                    // cria um embrulho de thread behaviour
-                    ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
-                    
-                    //especifica o comportamento de respondedor
-                    Behaviour responder = new SSContractNetResponder(myAgent, cfp){
-                        @Override
-                        protected ACLMessage handleCfp(ACLMessage cfp) {
-                            return serveHandleCfp(cfp);     
-                        }
-                        @Override
-                        protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-                            return serveHandleAcceptProposal(cfp, propose, accept); 
-                        }
-                    };
-                    
-                    //embrulha o comportamento acima como um thread behavior e o adiciona ao agente
-                    addBehaviour(tbf.wrap(responder));
-                }
-                else {
-                    block();
-                }
+            protected ACLMessage handleCfp(ACLMessage cfp) {
+                return serveHandleCfp(cfp);     
             }
-        });
+            @Override
+            protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
+                return serveHandleAcceptProposal(cfp, propose, accept); 
+            }
+        };
+        
+        addBehaviour(tbf.wrap(responder));
     }
     
     /**
