@@ -15,7 +15,6 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OntologyServer;
-import jade.core.behaviours.WakerBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -71,44 +70,9 @@ public abstract class MRA extends Agent {
      */
     protected abstract Skill[] getSkills();
 
-    /**
-     * This method executed after initialization father agent allowing son
-     * initialization.
-     */
-    protected void init() {
-    }
-
-    /**
-     * This method executed in OneShotBehaviour after initialization agent (end)
-     * Automatic code executed.
-     */
-    protected void autorun() {
-    }
-
-    /**
-     * Call to stop a CyclicBehaviour.
-     */
-    protected void stopAutorun() {
-        removeBehaviour(autorunBeh);
-    }
-
     @Override
     protected void setup() {
         defaultSetup();
-        //Execute the autorun
-        addBehaviour(new WakerBehaviour(this, 1000) {
-            @Override
-            public void onWake() {
-                init();
-                autorunBeh = new CyclicBehaviour(myAgent) {
-                    @Override
-                    public void action() {
-                        autorun();
-                    }
-                };
-                myAgent.addBehaviour(autorunBeh);
-            }
-        });
     }
     
     /**
