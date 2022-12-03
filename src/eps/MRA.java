@@ -129,6 +129,9 @@ public abstract class MRA extends Agent {
         }
 
         addBehaviour(new OntologyServer(this, EPSOntology.instance(), ACLMessage.REQUEST, this));
+        
+        //permite a execução de skills em paralelo com a negociação
+        addSkillExecutionBehaviour();
     }
 
     @Override
@@ -177,9 +180,6 @@ public abstract class MRA extends Agent {
                         resetQueueCount();
                     }
                 }
-//                else {
-//                    block();
-//                }
             }
         };
         
@@ -260,37 +260,20 @@ public abstract class MRA extends Agent {
      * @return A mensagem ACL de resposta que informa se a skill foi executada. 
      */
     protected ACLMessage serveHandleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
+        increaseCost();
         System.out.println(getLocalName() + ": Accept recebida de " + accept.getSender().getLocalName());
         ACLMessage reply = accept.createReply();
+        
         try {                        
             Execute exc = (Execute) cfp.getContentObject();
-            SkillTemplate requestedSkill = exc.getSkillTemplate();
-            for (Skill sk : skills) {
-                //verifica se a skill solicitada é válida e a executa, se for o caso
-                if (Util.fromSkill(sk).equalsWithoutAllProperties(requestedSkill)) { 
-                    sk.setArgsTypes(requestedSkill.getArgsTypes());
-                    sk.setArgsValues(requestedSkill.getArgsValues());
-                    try {
-                        sk.execute();
-                        if("failed".equals(sk.getResult())) {
-                            reply.setPerformative(ACLMessage.FAILURE);
-                            reply.setContent("failed");
-                        }
-                        else {
-                            reply.setPerformative(ACLMessage.INFORM);
-                            reply.setContent(sk.getResult());
-                        }
-                    } catch (SkillExecuteException ex) {
-                        Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
+            reply = addSkillExecutionRequest(exc, reply);
         } catch (UnreadableException ex) {
             Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("ContentObject inválido.");
         }
-        System.out.println(getLocalName() + ": Resposta enviada ao Accept de " + accept.getSender().getLocalName());
         
+        decreaseCost();
+        System.out.println(getLocalName() + ": Resposta enviada ao Accept de " + accept.getSender().getLocalName());
         return reply;         
     }
 
@@ -494,9 +477,46 @@ public abstract class MRA extends Agent {
         return queueCount;
     }
     
+    protected int readResultKey(){
+        if(skill_result_buffer != null){
+            return skill_result_buffer.getKey();
+        }
+        else return 0;
+    }
+    
+    protected  SkillResult getSkillResult() {
+        SkillResult result;
+        if(skill_result_buffer != null){
+            result = skill_result_buffer;
+        }
+        else {
+            result = null;
+            System.out.println(this.getLocalName() + "(executor): Não foi possível ler o resultado no buffer");
+        }
+        skill_result_buffer = null;
+        return result;
+    } 
+    
     
     protected int getSkillExecutionRequestsSize(){
         return skillExecutionRequests.size();
+    }
+    
+    protected  ACLMessage addSkillExecutionRequest(Execute exc, ACLMessage reply){
+        int key = getNewKey();
+        SkillRequest req = new SkillRequest(exc, reply, key); 
+        skillExecutionRequests.add(req);
+
+        while(readResultKey() != key){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        SkillResult result = getSkillResult();
+        return result.getReplyPbj();
     }
     
     protected SkillRequest getSkillExecutionRequest(){
