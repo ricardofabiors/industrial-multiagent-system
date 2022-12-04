@@ -6,9 +6,9 @@ package eps;
 
 import de.re.easymodbus.modbusclient.ModbusClient;
 import eps.ontology.Execute;
-import eps.ontology.EPSOntology;
 import eps.ontology.SkillRequest;
 import eps.ontology.SkillResult;
+import eps.ontology.EPSOntology;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -42,22 +42,22 @@ public abstract class MRA extends Agent {
     
     protected Queue<SkillRequest> skillExecutionRequests = new LinkedList<>(); //fila de requisição de execução de skills do MRA
     protected int queueCount = 0;
+    //protected int resultKey = 0;
     protected SkillResult skill_result_buffer = null;
     
     protected Skill[] skills;           //vetor de skills do MRA
     protected MRAInfo myMrainfo;        //conjuto de informações do MRA
-    protected int cost = 0;       //custo (tempo) (não utilizado ainda)
+    protected int cost = 0;        //custo (tempo)
     protected boolean isBusy = false;   //se está ocupado
     
     public static final String GREEN = "\033[0;32m";    //cor verde a ser utilizada nos prints
-    public static final String RESET = "\u001B[0m";
+    public static final String RESET = "\u001B[0m";     
     
     protected ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
-    
-    
+
     public MRA() {
     }
-
+    
     /**
      * The Mecatronic Agent MUST implements this method to return its information
      * @return the MRAInfo from this Mecatronic Agent.
@@ -70,9 +70,15 @@ public abstract class MRA extends Agent {
      */
     protected abstract Skill[] getSkills();
 
+    /**
+     * This method executed after initialization father agent allowing son
+     * initialization.
+     */
+    protected void init() {
+    }
+
     @Override
     protected void setup() {
-        defaultSetup();
     }
     
     /**
@@ -94,6 +100,12 @@ public abstract class MRA extends Agent {
 
         addBehaviour(new OntologyServer(this, EPSOntology.instance(), ACLMessage.REQUEST, this));
         
+        //permite 4 negociações ao mesmo tempo
+        addResponderBehaviour();
+        addResponderBehaviour();
+        addResponderBehaviour();
+        addResponderBehaviour();
+        
         //permite a execução de skills em paralelo com a negociação
         addSkillExecutionBehaviour();
     }
@@ -103,7 +115,35 @@ public abstract class MRA extends Agent {
         this.tbf.interrupt();
     }
     
-        protected void addSkillExecutionBehaviour() {
+//    protected ACLMessage executeSkill(SkillTemplate requestedSkill, ACLMessage initial_reply){
+//        ACLMessage final_reply = initial_reply;
+//                    
+//        for (Skill sk : skills) {
+//            //verifica se a skill solicitada é válida e a executa, se for o caso
+//            if (Util.fromSkill(sk).equalsWithoutAllProperties(requestedSkill)) { 
+//                sk.setArgsTypes(requestedSkill.getArgsTypes());
+//                sk.setArgsValues(requestedSkill.getArgsValues());
+//
+//                try {
+//                    sk.execute();
+//                    if("failed".equals(sk.getResult())) {
+//                        final_reply.setPerformative(ACLMessage.FAILURE);
+//                        final_reply.setContent("failed");
+//                    }
+//                    else {
+//                        final_reply.setPerformative(ACLMessage.INFORM);
+//                        final_reply.setContent(sk.getResult());
+//                    }
+//                } catch (SkillExecuteException ex) {
+//                    Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
+//        
+//        return final_reply;
+//    }
+
+    protected void addSkillExecutionBehaviour() {
         Behaviour executor = new CyclicBehaviour(this) {
             @Override
             public void action() {
@@ -141,7 +181,7 @@ public abstract class MRA extends Agent {
                     setSkillResult(result);
                     
                     if(getSkillExecutionRequestsSize() == 0){
-                        resetQueueCount();
+                        resetQueueCountAndKey();
                     }
                 }
             }
@@ -200,7 +240,7 @@ public abstract class MRA extends Agent {
             for (Skill skill : skills) {
                 //verifica se a skill solicitada é válida e muda o perfomativo, se for o caso
                 if (Util.fromSkill(skill).equalsWithoutAllProperties(requestedSkill)) { 
-                    System.out.println(getLocalName() + ": Skill coincidente identificada: " + skill.name);
+                    System.out.println(getLocalName() + ": Skill coincidente identificada");
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent(String.valueOf(getCost()));
                 }
@@ -235,10 +275,9 @@ public abstract class MRA extends Agent {
             Logger.getLogger(MRA.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("ContentObject inválido.");
         }
-        
         decreaseCost();
         System.out.println(getLocalName() + ": Resposta enviada ao Accept de " + accept.getSender().getLocalName());
-        return reply;         
+        return reply; 
     }
 
     /**
@@ -268,7 +307,7 @@ public abstract class MRA extends Agent {
             }
             @Override
             protected void handleAllResponses(Vector responses, Vector acceptances) {
-                serveHandleAllResponses(responses, acceptances, requester.getLocalName(), this);
+                serveHandleAllResponses(responses, acceptances, requester.getLocalName());
             }
             @Override
             protected void handleInform(ACLMessage inform) {                
@@ -334,7 +373,7 @@ public abstract class MRA extends Agent {
      * @param acceptances Vetor de mensagens ACL que contém todas as propostas recebidas.
      * @param requesterName Nome do agente a solicitar a skill.
      */
-    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName, Behaviour current_remote_exc_beh){
+    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName){
         ACLMessage bestPropose = null;
         int bestCost = 1000;        //infinito
         System.out.println(requesterName + ": Lendo proposes");
@@ -421,7 +460,9 @@ public abstract class MRA extends Agent {
     }
     
     
-    /////////////////////////////////////////////////////////////////////////////////
+    
+    ////////////////////////////////////////////////////////////////////////////////////////
+    
     
     
     protected synchronized int getCost() {
@@ -439,31 +480,6 @@ public abstract class MRA extends Agent {
     protected int getNewKey(){
         queueCount++;
         return queueCount;
-    }
-    
-    protected int readResultKey(){
-        if(skill_result_buffer != null){
-            return skill_result_buffer.getKey();
-        }
-        else return 0;
-    }
-    
-    protected  SkillResult getSkillResult() {
-        SkillResult result;
-        if(skill_result_buffer != null){
-            result = skill_result_buffer;
-        }
-        else {
-            result = null;
-            System.out.println(this.getLocalName() + "(executor): Não foi possível ler o resultado no buffer");
-        }
-        skill_result_buffer = null;
-        return result;
-    } 
-    
-    
-    protected int getSkillExecutionRequestsSize(){
-        return skillExecutionRequests.size();
     }
     
     protected  ACLMessage addSkillExecutionRequest(Execute exc, ACLMessage reply){
@@ -487,6 +503,27 @@ public abstract class MRA extends Agent {
         return skillExecutionRequests.remove();
     }
     
+    protected int readResultKey(){
+        if(skill_result_buffer != null){
+            return skill_result_buffer.getKey();
+        }
+        else return 0;
+    }
+    
+    protected int getSkillExecutionRequestsSize(){
+        return skillExecutionRequests.size();
+    }
+    
+    protected void resetQueueCountAndKey() {
+        if(skillExecutionRequests.size() == 0){
+            queueCount = 0;
+            //resultKey = 0;
+        }
+        else {
+            System.out.println(this.getLocalName() + "(executor): Não foi possível resetar a fila");
+        }
+    }
+        
     protected  void setSkillResult(SkillResult result) {
         if(skill_result_buffer == null){
             skill_result_buffer = result;
@@ -496,12 +533,17 @@ public abstract class MRA extends Agent {
         }
     }
     
-    protected void resetQueueCount() {
-        if(skillExecutionRequests.size() == 0){
-            queueCount = 0;
+    protected  SkillResult getSkillResult() {
+        SkillResult result;
+        if(skill_result_buffer != null){
+            result = skill_result_buffer;
         }
         else {
-            System.out.println(this.getLocalName() + "(executor): Não foi possível resetar a fila");
+            result = null;
+            System.out.println(this.getLocalName() + "(executor): Não foi possível ler o resultado no buffer");
         }
-    }
+        skill_result_buffer = null;
+        return result;
+    }   
+    
 }

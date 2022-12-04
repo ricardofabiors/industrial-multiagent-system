@@ -56,7 +56,6 @@ public class Conveyor extends MRA{
     @Override
     protected void setup(){
         defaultSetup();
-        addResponderBehaviour();
         setupModbusClient();
     }
     

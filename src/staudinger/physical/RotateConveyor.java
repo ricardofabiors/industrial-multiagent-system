@@ -55,7 +55,6 @@ public class RotateConveyor extends MRA{
     @Override
     protected void setup(){
         defaultSetup();
-        addResponderBehaviour();
     }
     
     /**

@@ -88,11 +88,11 @@ public class TestOrder extends Product{
         st1.setArgsValues(new String[]{"1"});
         myPlan.addNewPlanItem(st1);    //adiciona novo item no plano de execução
 
-        //conveyor 2 move o caixote 
-        SkillTemplate st2 = new SkillTemplate("move", "boolean", new String[]{"int"});
-        st2.addProperty("p2 to p3", "yes");
-        st2.setArgsValues(new String[]{"1"});
-        myPlan.addNewPlanItem(st2);    //adiciona novo item no plano de execução        
+//        //conveyor 2 move o caixote 
+//        SkillTemplate st2 = new SkillTemplate("move", "boolean", new String[]{"int"});
+//        st2.addProperty("p2 to p3", "yes");
+//        st2.setArgsValues(new String[]{"1"});
+//        myPlan.addNewPlanItem(st2);    //adiciona novo item no plano de execução        
         
 //        //conveyor 1 envia o caixote para a conveyor 2
 //        SkillTemplate st = new SkillTemplate("send", "boolean", new String[]{"int"});
@@ -135,47 +135,47 @@ public class TestOrder extends Product{
      * da rede de contrato pra execução remota, de modo a tentar de novo a execução
      * caso o melhor custo seja maior que 0
      */
-    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName, Behaviour this_remote_exc_beh){
-        ACLMessage bestPropose = null;
-        int bestCost = 1000;        //infinito
-        System.out.println(requesterName + ": Lendo proposes");
-        for (int i = 0; i < responses.size(); ++i) {
-            ACLMessage propose = (ACLMessage) responses.get(i);
-            if (propose.getPerformative() == ACLMessage.PROPOSE) {
-                int executer_cost = Integer.parseInt(propose.getContent());
-                System.out.println(requesterName + ": Custo de " + executer_cost + " para o " + propose.getSender().getLocalName());
-                if (bestPropose == null || executer_cost < bestCost) {
-                    bestPropose = propose;
-                    bestCost = executer_cost;
-                }
-            }
-        }
-        if (bestPropose != null) {
-            if(bestCost == 0){
-                ACLMessage accept = bestPropose.createReply();
-                accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                accept.setContent("accept");
-                acceptances.add(accept);
-                System.out.println(requesterName + ": Accept enviado para " + bestPropose.getSender().getLocalName());
-            }
-            else{
-                ACLMessage refuse = bestPropose.createReply();
-                refuse.setPerformative(ACLMessage.REFUSE);
-                refuse.setContent("refuse");
-                //acceptances.add(accept);
-                System.out.println(requesterName + ": Menor custo diferente de 0 - para " + bestPropose.getSender().getLocalName());
-                System.out.println(requesterName + ": Tentando de novo...");
-                           
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(TestOrder.class.getName()).log(Level.SEVERE, null, ex);
-                }
-           
-                this_remote_exc_beh.reset();
-            }
-        }
-    }
+//    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName, Behaviour this_remote_exc_beh){
+//        ACLMessage bestPropose = null;
+//        int bestCost = 1000;        //infinito
+//        System.out.println(requesterName + ": Lendo proposes");
+//        for (int i = 0; i < responses.size(); ++i) {
+//            ACLMessage propose = (ACLMessage) responses.get(i);
+//            if (propose.getPerformative() == ACLMessage.PROPOSE) {
+//                int executer_cost = Integer.parseInt(propose.getContent());
+//                System.out.println(requesterName + ": Custo de " + executer_cost + " para o " + propose.getSender().getLocalName());
+//                if (bestPropose == null || executer_cost < bestCost) {
+//                    bestPropose = propose;
+//                    bestCost = executer_cost;
+//                }
+//            }
+//        }
+//        if (bestPropose != null) {
+//            if(bestCost == 0){
+//                ACLMessage accept = bestPropose.createReply();
+//                accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//                accept.setContent("accept");
+//                acceptances.add(accept);
+//                System.out.println(requesterName + ": Accept enviado para " + bestPropose.getSender().getLocalName());
+//            }
+//            else{
+//                ACLMessage refuse = bestPropose.createReply();
+//                refuse.setPerformative(ACLMessage.REFUSE);
+//                refuse.setContent("refuse");
+//                //acceptances.add(accept);
+//                System.out.println(requesterName + ": Menor custo diferente de 0 - para " + bestPropose.getSender().getLocalName());
+//                System.out.println(requesterName + ": Tentando de novo...");
+//                           
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(TestOrder.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//           
+//                this_remote_exc_beh.reset();
+//            }
+//        }
+//    }
 
     /**
      * Sobrescreve o método "takeDown" de "Agent" especificando que o agente 
@@ -215,6 +215,6 @@ public class TestOrder extends Product{
             send(msg2);
             System.out.println(getLocalName() + ": msg INFORM enviada para o Gateway");
         }
-        
+        this.tbf.interrupt();
     }
 }
