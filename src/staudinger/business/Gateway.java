@@ -73,6 +73,40 @@ public class Gateway extends Agent {
         TestOrder teste;
         teste = new TestOrder(Box.GREEN,3);                     
         instantiate("Teste", teste);
+        
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        //cria e instancia um novo agente para a produção
+        TestOrder test_2;
+        test_2 = new TestOrder(Box.GREEN,3);                     
+        instantiate("Teste_2", test_2);
+        
+                try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+                //cria e instancia um novo agente para a produção
+        TestOrder test_3;
+        test_3 = new TestOrder(Box.GREEN,3);                     
+        instantiate("Teste_3", test_3);
+        
+                try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+                //cria e instancia um novo agente para a produção
+        TestOrder test_4;
+        test_4 = new TestOrder(Box.GREEN,3);                     
+        instantiate("Teste_4", test_4);
+        
     }
     
     protected void addNewRequest(int color, int quantity){

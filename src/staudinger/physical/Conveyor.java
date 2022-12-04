@@ -80,6 +80,12 @@ public class Conveyor extends MRA{
 //                    }
 //                    writeCoil(moveCoilAddress, false); 
                     
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
                     System.out.println(this.myMRA.getLocalName() + ": Movido.");
                     result = "true";
                     break;
