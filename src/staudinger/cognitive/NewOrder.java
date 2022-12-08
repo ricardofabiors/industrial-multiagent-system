@@ -12,8 +12,10 @@ import eps.Util;
 import eps.YPAException;
 import eps.ontology.EPSOntology;
 import jade.core.AID;
+import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -124,7 +126,40 @@ public class NewOrder extends Product{
         myMrainfo.setSkills(Util.fromSkill(getSkills()));
         return myMrainfo;
     }
-
+    
+    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName, Behaviour this_behaviour){
+        ACLMessage bestPropose = null;
+        int bestCost = 1000;        //infinito
+        System.out.println(requesterName + ": Lendo proposes");
+        for (int i = 0; i < responses.size(); ++i) {
+            ACLMessage propose = (ACLMessage) responses.get(i);
+            if (propose.getPerformative() == ACLMessage.PROPOSE) {
+                int executer_cost = Integer.parseInt(propose.getContent());
+                System.out.println(requesterName + ": Custo de " + executer_cost + " para o " + propose.getSender().getLocalName());
+                if (bestPropose == null || executer_cost < bestCost) {
+                    bestPropose = propose;
+                    bestCost = executer_cost;
+                }
+            }
+        }
+        if (bestPropose != null && bestCost == 0) {
+            ACLMessage accept = bestPropose.createReply();
+            accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+            accept.setContent("accept");
+            acceptances.add(accept);
+            System.out.println(requesterName + ": Accept enviado para " + bestPropose.getSender().getLocalName());
+        }
+        else{
+            System.out.println(requesterName + ": Reiniciando execução remota - a melhor proposta (" + bestPropose.getSender().getLocalName() + ") tem custo maior que 0");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(NewOrder.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this_behaviour.reset();
+        }
+    }
+    
     /**
      * Sobrescreve o método "takeDown" de "Agent" especificando que o agente 
      * "NewOrder" avisará ao "Gateway" o resultado da solicitação.
