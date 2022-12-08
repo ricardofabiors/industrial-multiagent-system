@@ -307,7 +307,7 @@ public abstract class MRA extends Agent {
             }
             @Override
             protected void handleAllResponses(Vector responses, Vector acceptances) {
-                serveHandleAllResponses(responses, acceptances, requester.getLocalName());
+                serveHandleAllResponses(responses, acceptances, requester.getLocalName(), this);
             }
             @Override
             protected void handleInform(ACLMessage inform) {                
@@ -373,7 +373,7 @@ public abstract class MRA extends Agent {
      * @param acceptances Vetor de mensagens ACL que contém todas as propostas recebidas.
      * @param requesterName Nome do agente a solicitar a skill.
      */
-    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName){
+    protected void serveHandleAllResponses(Vector responses, Vector acceptances, String requesterName, Behaviour this_behaviour){
         ACLMessage bestPropose = null;
         int bestCost = 1000;        //infinito
         System.out.println(requesterName + ": Lendo proposes");
