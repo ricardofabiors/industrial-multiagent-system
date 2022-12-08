@@ -163,6 +163,6 @@ public class NewOrder extends Product{
             send(msg2);
             System.out.println(getLocalName() + ": msg INFORM enviada para o Gateway");
         }
-        
+        this.tbf.interrupt();
     }
 }
