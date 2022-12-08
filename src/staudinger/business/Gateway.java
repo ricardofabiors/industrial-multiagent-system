@@ -69,44 +69,58 @@ public class Gateway extends Agent {
         instantiateSuportLayerAgents();
         instantiatePhysicalLayerAgents();
         
+//        //teste
+//        addNewRequest(Box.BLACK,3);
+//        executeRequests();
+//        
+//        addNewRequest(Box.BLACK,3);
+//        addNewRequest(Box.GREEN,3);
+//        executeRequests();
+        
         //cria e instancia um novo agente para a produção
-        TestOrder teste;
-        teste = new TestOrder(Box.GREEN,3);                     
-        instantiate("Teste", teste);
+        NewOrder production;
+        production = new NewOrder(Box.BLACK,3);                     
+        instantiate("Product_1", production);
         
         try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
-            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        //cria e instancia um novo agente para a produção
-        TestOrder test_2;
-        test_2 = new TestOrder(Box.GREEN,3);                     
-        instantiate("Teste_2", test_2);
-        
-                try {
+        NewOrder production_2;
+        production_2 = new NewOrder(Box.BLACK,3);                     
+        instantiate("Product_2", production_2);
+
+        try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
-            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-                //cria e instancia um novo agente para a produção
-        TestOrder test_3;
-        test_3 = new TestOrder(Box.GREEN,3);                     
-        instantiate("Teste_3", test_3);
+        NewOrder production_3;
+        production_3 = new NewOrder(Box.BLACK,3);                     
+        instantiate("Product_3", production_3);
         
-                try {
-            Thread.sleep(500);
+        try {
+            Thread.sleep(15000);
         } catch (InterruptedException ex) {
-            Logger.getLogger(Gateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-                //cria e instancia um novo agente para a produção
-        TestOrder test_4;
-        test_4 = new TestOrder(Box.GREEN,3);                     
-        instantiate("Teste_4", test_4);
+        NewOrder production_4;
+        production_4 = new NewOrder(Box.BLACK,3);                     
+        instantiate("Product_4", production_4);
         
+//        try {
+//            Thread.sleep(15000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        NewOrder production_5;
+//        production_5 = new NewOrder(Box.BLACK,3);                     
+//        instantiate("Product_5", production_5);
     }
     
     protected void addNewRequest(int color, int quantity){
@@ -236,47 +250,47 @@ public class Gateway extends Agent {
      * Método chamado no "setup" do agente para instanciar todos os agentes da 
      * camada física utilizando o método "instanciate".
      */
-    protected void instantiatePhysicalLayerAgents() {        
+    protected void instantiatePhysicalLayerAgents() {
+        System.out.println(this.getLocalName() + ": Instanciando agentes da camada física...");
+        StorageConveyor storage;
+        storage = new StorageConveyor("p0 to p1");
+        instantiate("StorageConveyor", storage);
+        
+        RotateConveyor rotate1;
+        rotate1 = new RotateConveyor("to p2", "to p11", "from p1", "from p11");
+        instantiate("RotateConveyor1", rotate1);
+        
+        RotateConveyor rotate2;
+        rotate2 = new RotateConveyor("to p4", "to p6", "from p3", "from p6");
+        instantiate("RotateConveyor2", rotate2);
+        
         Conveyor conveyor1;
-        conveyor1 = new Conveyor("p0 to p1", 0, 0, 1, 1, 2, 2);
+        conveyor1 = new Conveyor("p2 to p3");
         instantiate("Conveyor1", conveyor1);
         
         Conveyor conveyor2;
-        conveyor2 = new Conveyor("p2 to p3", 3, 3, 4, 4, 5, 5);
+        conveyor2 = new Conveyor("p11 to p12");
         instantiate("Conveyor2", conveyor2);
         
-//        System.out.println(this.getLocalName() + ": Instanciando agentes da camada física...");
-//        StorageConveyor storage;
-//        storage = new StorageConveyor("p0 to p1");
-//        instantiate("StorageConveyor", storage);
-//        
-//        RotateConveyor rotate1;
-//        rotate1 = new RotateConveyor("to p2", "to p11", "from p1", "from p11");
-//        instantiate("RotateConveyor1", rotate1);
-//        
-//        RotateConveyor rotate2;
-//        rotate2 = new RotateConveyor("to p4", "to p6", "from p3", "from p6");
-//        instantiate("RotateConveyor2", rotate2);
-//
-//        ResourceConveyor resourceconv;
-//        resourceconv = new ResourceConveyor("p6 to p7", "p6 to p8", "p7 to p8", "p8 to p9");
-//        instantiate("ResourceConveyor", resourceconv);
-//        
-//        MachineTool machinetool;
-//        machinetool = new MachineTool("p8");
-//        instantiate("MachineTool", machinetool);
-//        
-//        PneumaticPicking pneumatic;
-//        pneumatic = new PneumaticPicking("p7");
-//        instantiate("PneumaticPicking", pneumatic);
-//        
-//        DestinyConveyor destiny1;
-//        destiny1 = new DestinyConveyor("p12 to p13");
-//        instantiate("DestinyConveyor1", destiny1);
-//        
-//        DestinyConveyor destiny2;
-//        destiny2 = new DestinyConveyor("p9 to p10");
-//        instantiate("DestinyConveyor2", destiny2);
+        ResourceConveyor resourceconv;
+        resourceconv = new ResourceConveyor("p6 to p7", "p6 to p8", "p7 to p8", "p8 to p9");
+        instantiate("ResourceConveyor", resourceconv);
+        
+        MachineTool machinetool;
+        machinetool = new MachineTool("p8");
+        instantiate("MachineTool", machinetool);
+        
+        PneumaticPicking pneumatic;
+        pneumatic = new PneumaticPicking("p7");
+        instantiate("PneumaticPicking", pneumatic);
+        
+        DestinyConveyor destiny1;
+        destiny1 = new DestinyConveyor("p12 to p13");
+        instantiate("DestinyConveyor1", destiny1);
+        
+        DestinyConveyor destiny2;
+        destiny2 = new DestinyConveyor("p9 to p10");
+        instantiate("DestinyConveyor2", destiny2);
     }
     
     /**

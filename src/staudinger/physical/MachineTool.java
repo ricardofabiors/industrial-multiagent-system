@@ -35,6 +35,7 @@ public class MachineTool extends MRA{
     @Override
     protected void setup(){
         defaultSetup();
+        addResponderBehaviour();
     }
     
     /**

@@ -11,6 +11,8 @@ import eps.MRAInfo;
 import eps.Skill;
 import eps.SkillExecuteException;
 import eps.Util;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Classe que modela o módulo Register Storage with Conveyor Belt do demonstrador
@@ -38,6 +40,10 @@ public class StorageConveyor extends MRA{
     @Override
     protected void setup(){
         defaultSetup();
+//        addResponderBehaviour();
+//        addResponderBehaviour();
+//        addResponderBehaviour();
+//        addSkillExecutionBehaviour();
     }
     
     /**
@@ -51,6 +57,12 @@ public class StorageConveyor extends MRA{
             isBusy = true;
             if(isThereBox()){
                 System.out.println(this.myMRA.getLocalName() + ": Pegando e movendo um novo caixote..."); 
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                System.out.println(this.myMRA.getLocalName() + ": Caixote pego e movido"); 
                 result = "true";
             }
             else{

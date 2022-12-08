@@ -84,29 +84,29 @@ public class NewOrder extends Product{
         st.addProperty("p0 to p1", "yes");
         myPlan.addNewPlanItem(st);    //adiciona novo item no plano de execução
         
-        //rotate conveyor recebe o caixote
-        SkillTemplate st0 = new SkillTemplate("receive", "boolean", new String[]{"int"});
-        st0.addProperty("from p1", "yes");
-        st0.setArgsValues(new String[]{"1"});
-        myPlan.addNewPlanItem(st0);    //adiciona novo item no plano de execução
-        
-        //rotate conveyor analisa a cor do caixote
-        SkillTemplate st1 = new SkillTemplate("checkColor", "boolean", new String[]{"int"});
-        st1.addProperty("from p1", "yes");
-        st1.setArgsValues(new String[]{String.valueOf(requestedColor)});
-        PlanItem decision = myPlan.createNewPlanItem(st1);    //adiciona novo item no plano de execução
-        
-        //possível instanciação de um agente do tipo Insert
-        SkillTemplate st2 = new SkillTemplate("instantiate", "boolean", new String[]{"string", "string", "string"});
-        st2.setArgsValues(new String[]{("Insert (from-" + this.getLocalName() + ")"), "staudinger.cognitive.Insert", String.valueOf(requestedColor)});
-        PlanItem choice0 = myPlan.createNewPlanItem(st2);    //adiciona novo item no plano de execução        
-        
-        //possível instanciação de um agente do tipo Production
-        SkillTemplate st3 = new SkillTemplate("instantiate", "boolean", new String[]{"string", "string", "string"});
-        st3.setArgsValues(new String[]{("Production (from-" + this.getLocalName() + ")"), "staudinger.cognitive.Production", String.valueOf(requestedQuantity)});
-        PlanItem choice1 = myPlan.createNewPlanItem(st3);    //adiciona novo item no plano de execução        
-        
-        myPlan.addNewDecisionItem(decision, choice0, choice1);    //adiciona novo item de decisão no plano de execução
+//        //rotate conveyor recebe o caixote
+//        SkillTemplate st0 = new SkillTemplate("receive", "boolean", new String[]{"int"});
+//        st0.addProperty("from p1", "yes");
+//        st0.setArgsValues(new String[]{"1"});
+//        myPlan.addNewPlanItem(st0);    //adiciona novo item no plano de execução
+//        
+//        //rotate conveyor analisa a cor do caixote
+//        SkillTemplate st1 = new SkillTemplate("checkColor", "boolean", new String[]{"int"});
+//        st1.addProperty("from p1", "yes");
+//        st1.setArgsValues(new String[]{String.valueOf(requestedColor)});
+//        PlanItem decision = myPlan.createNewPlanItem(st1);    //adiciona novo item no plano de execução
+//        
+//        //possível instanciação de um agente do tipo Insert
+//        SkillTemplate st2 = new SkillTemplate("instantiate", "boolean", new String[]{"string", "string", "string"});
+//        st2.setArgsValues(new String[]{("Insert (from-" + this.getLocalName() + ")"), "staudinger.cognitive.Insert", String.valueOf(requestedColor)});
+//        PlanItem choice0 = myPlan.createNewPlanItem(st2);    //adiciona novo item no plano de execução        
+//        
+//        //possível instanciação de um agente do tipo Production
+//        SkillTemplate st3 = new SkillTemplate("instantiate", "boolean", new String[]{"string", "string", "string"});
+//        st3.setArgsValues(new String[]{("Production (from-" + this.getLocalName() + ")"), "staudinger.cognitive.Production", String.valueOf(requestedQuantity)});
+//        PlanItem choice1 = myPlan.createNewPlanItem(st3);    //adiciona novo item no plano de execução        
+//        
+//        myPlan.addNewDecisionItem(decision, choice0, choice1);    //adiciona novo item de decisão no plano de execução
     }
     
     /**

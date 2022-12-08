@@ -47,6 +47,7 @@ public class ResourceConveyor extends MRA{
     @Override
     protected void setup(){
         defaultSetup();
+        addResponderBehaviour();
     }
     
     /**

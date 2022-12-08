@@ -25,4 +25,5 @@ public abstract class Product extends MRA {
     protected Skill[] getSkills() {
         return new Skill[0];
     }
+
 }

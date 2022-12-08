@@ -10,7 +10,6 @@ import eps.MRA;
 import eps.SkillTemplate;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import java.util.ArrayList;
 
@@ -34,7 +33,7 @@ public class Plan {
         this.seqBehaviour = new SequentialBehaviour();
         this.setOwner(owner);
         this.plan = new ArrayList();
-        this.owner.addBehaviour(this.seqBehaviour);
+        
     }
     
     /**
@@ -59,11 +58,6 @@ public class Plan {
     public PlanItem createNewPlanItem(SkillTemplate skill){
         PlanItem newItem = new PlanItem(skill, owner);
         return newItem;
-    }
-
-    public void addNewParallelItem(PlanItem item_1, PlanItem item_2){
-        Item newItem = new ParallelItem(item_1, item_2);
-        plan.add(newItem);
     }
     
     /**
@@ -97,6 +91,7 @@ public class Plan {
                 owner.doDelete();
             }
         });
+        this.owner.addBehaviour(this.seqBehaviour);
     }
 
     public void setOwner(MRA owner) {
