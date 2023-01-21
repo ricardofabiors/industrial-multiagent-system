@@ -83,7 +83,7 @@ public class Gateway extends Agent {
         instantiate("Product_1", production);
         
         try {
-            Thread.sleep(500);
+            Thread.sleep(5000);
         } catch (InterruptedException ex) {
             Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -93,7 +93,7 @@ public class Gateway extends Agent {
         instantiate("Product_2", production_2);
 
         try {
-            Thread.sleep(500);
+            Thread.sleep(5000);
         } catch (InterruptedException ex) {
             Logger.getLogger(Conveyor.class.getName()).log(Level.SEVERE, null, ex);
         }
