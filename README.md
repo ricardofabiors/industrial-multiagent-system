@@ -1,2 +1,2 @@
 # industrial-multiagent-system
- An application of MAS to a shop floor
+ A application of MAS to a shop floor
